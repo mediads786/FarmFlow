@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Updating FarmFlow</title>
+<style>body{font:16px system-ui;background:#f5f7fa;color:#294b73;display:grid;place-items:center;min-height:90vh}main{text-align:center}button{padding:12px 24px;cursor:pointer}</style>
+<main><h1>Updating FarmFlow</h1><p id="status">Loading the latest screens and banner images…</p><button hidden onclick="location.reload()">Retry</button></main>
+<script>
+(async () => {
+  try {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.filter(r => [r.active, r.waiting, r.installing].some(w => w && new URL(w.scriptURL).pathname.endsWith('/flutter_service_worker.js'))).map(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k => k.startsWith('flutter-')).map(k => caches.delete(k)));
+    }
+    const version = Date.now();
+    const response = await fetch('main.dart.js?update=' + version, {cache:'reload'});
+    if (!response.ok) throw new Error('Unable to load the updated app.');
+    location.replace('index.html?update=' + version);
+  } catch (error) {
+    document.getElementById('status').textContent = 'Update could not finish. Please retry.';
+    document.querySelector('button').hidden = false;
+  }
+})();
+</script>
+</html>
