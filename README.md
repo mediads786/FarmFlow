@@ -10,7 +10,7 @@ FarmFlow is a cattle-farm operations application covering purchase batches and a
 
 ## Explore the showcase
 
-**[Open the live demo — link will be added after Vercel deployment](#deployment-status)**
+**[Open the live FarmFlow Showcase](https://farm-flow-wheat.vercel.app/)**
 
 Select a demonstration role to explore the corresponding view; no real account is required. The manager view exposes the full showcase navigation. The browser application uses fictional market and supplier names, animal records, and shipment figures; money is displayed in USD. The data shown is illustrative, not a production benchmark.
 
@@ -79,8 +79,7 @@ README.md
 
 ## Deployment status
 
-The compiled static files are committed to GitHub. **Vercel deployment is pending verification; no public URL is claimed yet.** The intended static-host configuration is the repository root (`.`) as the output directory, with no Flutter build step on Vercel. Once deployed, the live URL will be inserted above and verified in a fresh browser session, including asset loading and navigation.
-
+The FarmFlow Showcase is deployed on Vercel: **[Open the live demo](https://farm-flow-wheat.vercel.app/)**. The deployment uses the repository root (`.`) as its output directory, with no Flutter build step on Vercel.
 Local showcase testing: the Flutter test suite passed, the release web build completed, and the dashboard, navigation, read-only controls, and most searches were reviewed in Chrome. This does **not** establish deployment success or full V1 backend integration-test coverage.
 
 ## Data, privacy and limitations
