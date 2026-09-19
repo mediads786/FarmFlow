@@ -1,0 +1,43 @@
+-- FarmFlow V1 — constraints, foreign keys, and non-constraint indexes
+
+alter table public.animals add constraint animals_batch_id_fkey FOREIGN KEY (batch_id) REFERENCES batches(id) ON DELETE RESTRICT;
+alter table public.animals add constraint animals_induction_weight_min_check CHECK (((induction_weight IS NULL) OR (induction_weight >= (1)::numeric))) NOT VALID;
+alter table public.animals add constraint animals_pkey PRIMARY KEY (id);
+alter table public.animals add constraint animals_shipment_id_fkey FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE RESTRICT;
+alter table public.animals add constraint animals_tag_key UNIQUE (tag);
+alter table public.batches add constraint batches_batch_code_key UNIQUE (batch_code);
+alter table public.batches add constraint batches_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id);
+alter table public.batches add constraint batches_pkey PRIMARY KEY (id);
+alter table public.farm_lookup_values add constraint farm_lookup_values_category_check CHECK ((category = ANY (ARRAY['market'::text, 'supplier'::text, 'breed'::text])));
+alter table public.farm_lookup_values add constraint farm_lookup_values_created_by_fkey FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT;
+alter table public.farm_lookup_values add constraint farm_lookup_values_pkey PRIMARY KEY (id);
+alter table public.farm_lookup_values add constraint farm_lookup_values_value_check CHECK (((char_length(btrim(value)) >= 1) AND (char_length(btrim(value)) <= 100)));
+alter table public.farm_tag_config add constraint farm_tag_config_configured_by_fkey FOREIGN KEY (configured_by) REFERENCES users(id) ON DELETE RESTRICT;
+alter table public.farm_tag_config add constraint farm_tag_config_id_check CHECK ((id = 1));
+alter table public.farm_tag_config add constraint farm_tag_config_pkey PRIMARY KEY (id);
+alter table public.farm_tag_config add constraint farm_tag_config_shape_check CHECK ((((tag_mode = 'numeric'::text) AND (tag_prefix IS NULL) AND (tag_separator IS NULL)) OR ((tag_mode = 'prefixed'::text) AND (tag_prefix IS NOT NULL) AND (tag_separator IS NOT NULL))));
+alter table public.farm_tag_config add constraint farm_tag_config_tag_min_digits_check CHECK (((tag_min_digits >= 1) AND (tag_min_digits <= 18)));
+alter table public.farm_tag_config add constraint farm_tag_config_tag_mode_check CHECK ((tag_mode = ANY (ARRAY['prefixed'::text, 'numeric'::text])));
+alter table public.induction_corrections add constraint induction_corrections_animal_id_fkey FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE RESTRICT;
+alter table public.induction_corrections add constraint induction_corrections_changed_by_fkey FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE RESTRICT;
+alter table public.induction_corrections add constraint induction_corrections_new_weight_check CHECK ((new_weight >= (1)::numeric));
+alter table public.induction_corrections add constraint induction_corrections_pkey PRIMARY KEY (id);
+alter table public.induction_corrections add constraint induction_corrections_reason_check CHECK ((char_length(btrim(reason)) >= 3));
+alter table public.purchase_corrections add constraint purchase_corrections_action_check CHECK ((action = ANY (ARRAY['edit'::text, 'delete'::text])));
+alter table public.purchase_corrections add constraint purchase_corrections_changed_by_fkey FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE RESTRICT;
+alter table public.purchase_corrections add constraint purchase_corrections_pkey PRIMARY KEY (id);
+alter table public.purchase_corrections add constraint purchase_corrections_reason_check CHECK ((char_length(btrim(reason)) >= 3));
+alter table public.shipments add constraint shipments_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id);
+alter table public.shipments add constraint shipments_pkey PRIMARY KEY (id);
+alter table public.shipments add constraint shipments_shipment_code_key UNIQUE (shipment_code);
+alter table public.users add constraint users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
+alter table public.users add constraint users_pkey PRIMARY KEY (id);
+alter table public.users add constraint users_role_check CHECK ((role = ANY (ARRAY['management'::text, 'purchase'::text, 'induction'::text])));
+
+CREATE INDEX animals_batch_id_idx ON public.animals USING btree (batch_id);
+CREATE INDEX animals_shipment_id_idx ON public.animals USING btree (shipment_id);
+CREATE INDEX farm_lookup_values_active_category_idx ON public.farm_lookup_values USING btree (category, active, value);
+CREATE UNIQUE INDEX farm_lookup_values_category_value_uq ON public.farm_lookup_values USING btree (category, lower(btrim(value)));
+CREATE INDEX purchase_corrections_animal_id_idx ON public.purchase_corrections USING btree (animal_id);
+CREATE INDEX purchase_corrections_batch_id_idx ON public.purchase_corrections USING btree (batch_id);
+CREATE INDEX purchase_corrections_changed_at_idx ON public.purchase_corrections USING btree (changed_at DESC);
